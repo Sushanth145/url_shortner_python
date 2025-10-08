@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: url_python_user
+      POSTGRES_PASSWORD: 0A9mOcZiMD74Kmeh07LekWeP7O8M9A0s
+      POSTGRES_DB: url_python
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+  web:
+    build: .
+    depends_on: [db, redis]
+    environment:
+      DATABASE_URL: postgresql://url_python_user:0A9mOcZiMD74Kmeh07LekWeP7O8M9A0s@dpg-d3i6hk3ipnbc73du3l70-a/url_python
+      REDIS_URL: rediss://default:AU86AAIncDI2OTIxNGVlOWVhOTQ0NWQ0OTdmMzk3N2UxMzU1MjIzNXAyMjAyODI@strong-imp-20282.upstash.io:6379
+      BASE_HOST: http://localhost:8000
+    ports:
+      - "8000:8000"
+  worker:
+    build: .
+    depends_on: [db, redis]
+    environment:
+      DATABASE_URL: postgresql://url_python_user:0A9mOcZiMD74Kmeh07LekWeP7O8M9A0s@dpg-d3i6hk3ipnbc73du3l70-a/url_python
+      REDIS_URL: rediss://default:AU86AAIncDI2OTIxNGVlOWVhOTQ0NWQ0OTdmMzk3N2UxMzU1MjIzNXAyMjAyODI@strong-imp-20282.upstash.io:6379
+    command: ["python", "worker.py"]
+volumes:
+  db_data:
+  redis_data:
